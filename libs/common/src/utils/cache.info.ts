@@ -15,4 +15,18 @@ export class CacheInfo {
     key: "examples",
     ttl: Constants.oneHour(),
   };
+
+  static WhitelistedTokens(): CacheInfo {
+    return {
+      key: "whitelistedTokens",
+      ttl: Constants.oneHour(),
+    };
+  }
+
+  static UnbondPeriod(): CacheInfo {
+    return {
+      key: "unbondPeriod",
+      ttl: Constants.oneHour(),
+    };
+  }
 }
