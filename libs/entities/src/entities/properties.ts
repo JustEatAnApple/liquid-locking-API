@@ -14,3 +14,21 @@ export class UnbondPeriodOutput {
     @ApiProperty()
     unbondPeriod!: number;
 }
+
+export class UnlockedTokenAmounts {
+    @ApiProperty()
+    tokenID!: string;
+
+    // @ApiProperty()
+}
+
+export class EsdtTokenPayment {
+    @ApiProperty()
+    tokenID!: string;
+
+    @ApiProperty()
+    nonce!: number;
+
+    @ApiProperty()
+    amount!: number
+}
