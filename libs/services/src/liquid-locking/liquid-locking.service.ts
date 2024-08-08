@@ -420,13 +420,13 @@ export class LiquidLockingService {
 
     async addTokenToWhitelist(address: string, body: TokenIdentifier
     ): Promise<UnbondPeriodOutput> {
-        const transaction = this.createTransaction(address, [body.token_identifier], "set_unbond_period", []);
+        const transaction = this.createTransaction(address, [body.token_identifier], "whitelist_token", []);
         return transaction;
     }
 
     async addTokenToBlackList(address: string, body: TokenIdentifier
     ): Promise<UnbondPeriodOutput> {
-        const transaction = this.createTransaction(address, [body.token_identifier], "set_unbond_period", []);
+        const transaction = this.createTransaction(address, [body.token_identifier], "blacklist_token", []);
         return transaction;
     }
 }
