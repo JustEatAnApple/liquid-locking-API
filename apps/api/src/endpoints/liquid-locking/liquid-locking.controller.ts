@@ -1,5 +1,5 @@
 import { LiquidLockingService } from "@libs/services/liquid-locking/liquid-locking.service";
-import { TokenIdentifierList, UnbondPeriodOutput } from "@libs/entities/entities/properties";
+import { PaymentList, TokenIdentifierList, UnbondPeriodOutput } from "@libs/entities/entities/properties";
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { NativeAuth, NativeAuthGuard } from "@multiversx/sdk-nestjs-auth";
 
@@ -10,7 +10,8 @@ export class LiquidLockingController {
         private readonly liquidlockingService: LiquidLockingService,
     ) { }
 
-    // whitelist[] or whitelist that has [] inside?
+    // MODEL VIEW - FOLOSITI USEGUARD DOAR UNDE E NEVOIE DE ADDRESS
+
     @Get("/whitelistedTokens")
     async getWhitelistedTokens(
     ): Promise<TokenIdentifierList> {
@@ -19,6 +20,50 @@ export class LiquidLockingController {
     @Get("/unbondPeriod")
     async getUnbondPeriod(): Promise<UnbondPeriodOutput> {
         return await this.liquidlockingService.getUnbondPeriod();
+    }
+
+    @Post("/lock")
+    @UseGuards(NativeAuthGuard)
+    generateLockTransaction(
+        @NativeAuth('address') address: string,
+        @Body() body: PaymentList,
+    ): any {
+        console.log('Received address:', address);
+        console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
+        return this.liquidlockingService.generateLockTransaction(address, body);
+    }
+
+    @Post("/lockTx")
+    @UseGuards(NativeAuthGuard)
+    sendLockTransaction(
+        @NativeAuth('address') address: string,
+        @Body() body: PaymentList,
+    ): any {
+        console.log('Received address:', address);
+        console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
+        return this.liquidlockingService.sendLockTransaction(address, body);
+    }
+
+    @Post("/unlock")
+    @UseGuards(NativeAuthGuard)
+    generateUnlockTransaction(
+        @NativeAuth('address') address: string,
+        @Body() body: PaymentList,
+    ): any {
+        console.log('Received address:', address);
+        console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
+        return this.liquidlockingService.generateUnlockTransaction(address, body);
+    }
+
+    @Post("/unlockTx")
+    @UseGuards(NativeAuthGuard)
+    sendUnlockTransaction(
+        @NativeAuth('address') address: string,
+        @Body() body: PaymentList,
+    ): any {
+        console.log('Received address:', address);
+        console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
+        return this.liquidlockingService.sendUnlockTransaction(address, body);
     }
 
     @Post("/unbond")

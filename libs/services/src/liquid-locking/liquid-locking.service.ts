@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { TokenIdentifier, TokenIdentifierList, UnbondPeriodOutput } from "@libs/entities/entities/properties";
-import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, SmartContractTransactionsFactory, Transaction, TransactionComputer, TransactionsFactoryConfig } from "@multiversx/sdk-core/out";
+import { PaymentList, TokenIdentifier, TokenIdentifierList, UnbondPeriodOutput } from "@libs/entities/entities/properties";
+import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, SmartContractTransactionsFactory, Token, TokenTransfer, Transaction, TransactionComputer, TransactionsFactoryConfig } from "@multiversx/sdk-core/out";
 import abiLiquid from "./liquid-locking.abi.json";
 import { ApiNetworkProvider } from "@multiversx/sdk-network-providers";
 import { UserSigner } from "@multiversx/sdk-wallet"; // usually from frontend
@@ -33,6 +33,9 @@ export class LiquidLockingService {
         });
     }
 
+
+    // MODEL VIEW: FUNC CU CACHE CA MAI JOS + RAW
+    // IN cachingService trebuie creata o structura pentru view cu key si ttl
     // eslint-disable-next-line require-await
     public async getWhitelistedTokens(): Promise<TokenIdentifierList> {
         return this.cachingService.getOrSet(
@@ -57,7 +60,7 @@ export class LiquidLockingService {
 
         const tokenIdentifiers: TokenIdentifier[] = whitelistedTokensResponse.map((tokenID: any) => {
             const tokenIdentifier = new TokenIdentifier();
-            tokenIdentifier.tokenID = tokenID.toString();
+            tokenIdentifier.token_identifier = tokenID.toString();
             return tokenIdentifier;
         });
 
@@ -97,25 +100,122 @@ export class LiquidLockingService {
 
     }
 
-    public generateUnbondTransaction(address: string, body: TokenIdentifierList): any {
-        // Output bad
+    public generateLockTransaction(address: string, args: PaymentList): any {
+        if (!args || !args.tokens || !Array.isArray(args.tokens)) {
+            throw new Error("Invalid body or tokens array");
+        }
+
+        const tokens = args.tokens.map(token => {
+            const { token_identifier, token_nonce, amount } = token;
+            return {
+                token_identifier,
+                token_nonce,
+                amount,
+            };
+        });
+
+        console.log("Tokens:", tokens);
+        const esdtTokens = tokens.map(token => new TokenTransfer({
+            token: new Token({
+                identifier: token.token_identifier,
+                nonce: BigInt(token.token_nonce),
+            }),
+            amount: BigInt(token.amount),
+        }));
+
+        console.log("ESDTTokens: ", esdtTokens);
+
+        const transaction = this.createTransaction(address, [], "lock", esdtTokens);
+
+        return transaction;
+    }
+
+    public generateUnlockTransaction(address: string, args: PaymentList): any {
+        if (!args || !args.tokens || !Array.isArray(args.tokens)) {
+            throw new Error("Invalid body or tokens array");
+        }
+
+        const tokens = args.tokens.map(token => {
+            const { token_identifier, token_nonce, amount } = token;
+            return {
+                token_identifier,
+                token_nonce,
+                amount,
+            };
+        });
+
+        console.log("Tokens:", tokens);
+        const wrappedTokens = [tokens];
+
+        const transaction = this.createTransaction(address, wrappedTokens, "unlock", []);
+
+        return transaction;
+    }
+
+
+    public generateUnbondTransaction(address: string, args: TokenIdentifierList): any {
+        if (!args || !args.tokens || !Array.isArray(args.tokens)) {
+            throw new Error("Invalid body or tokens array");
+        }
+
+        const tokenIDs = args.tokens.map(token => token.token_identifier);
+        const wrappedTokens = [tokenIDs];
+
+        const transaction = this.createTransaction(address, wrappedTokens, "unbond", []);
+
+        return transaction;
+    }
+
+    public generateLockTransactionFromBackend(address: string, body: PaymentList): Transaction {
         if (!body || !body.tokens || !Array.isArray(body.tokens)) {
             throw new Error("Invalid body or tokens array");
         }
 
-        const tokenIDs = body.tokens.map(token => token.tokenID);
-        // Output gud
-        console.log('TokenIds List:', tokenIDs);
+        const tokens = body.tokens.map(token => {
+            const { token_identifier, token_nonce, amount } = token;
+            return {
+                token_identifier,
+                token_nonce,
+                amount,
+            };
+        });
 
-        const transaction = this.transactionsFactory.createTransactionForExecute({
-            sender: Address.fromBech32(address),
-            contract: Address.fromBech32(this.networkConfigService.config.liquidlockingContract),
-            function: "unbond",
-            gasLimit: BigInt(35_000_000),
-            arguments: [
-                tokenIDs,
-            ],
-        }).toPlainObject();
+        console.log("Tokens:", tokens);
+        const esdtTokens = tokens.map(token => new TokenTransfer({
+            token: new Token({
+                identifier: token.token_identifier,
+                nonce: BigInt(token.token_nonce),
+            }),
+            amount: BigInt(token.amount),
+        }));
+
+
+        const transaction = this.createTransactionFromBackend(address, [], "lock", esdtTokens);
+
+        return transaction;
+    }
+
+    // [[{},{}]]
+    public generateUnlockTransactionFromBackend(address: string, body: PaymentList): Transaction {
+        if (!body || !body.tokens || !Array.isArray(body.tokens)) {
+            throw new Error("Invalid body or tokens array");
+        }
+
+        const tokens = body.tokens.map(token => {
+            const { token_identifier, token_nonce, amount } = token;
+            return {
+                token_identifier,
+                token_nonce,
+                amount,
+            };
+        });
+
+        console.log("Tokens:", tokens);
+        const wrappedTokens = [tokens];
+
+        console.log("Wrapped Tokens:", wrappedTokens);
+
+        const transaction = this.createTransactionFromBackend(address, wrappedTokens, "unlock", []);
 
         return transaction;
     }
@@ -126,22 +226,50 @@ export class LiquidLockingService {
             throw new Error("Invalid body or tokens array");
         }
 
-        const tokenIDs = body.tokens.map(token => token.tokenID);
+        const tokenIDs = body.tokens.map(token => token.token_identifier);
         // Output gud
         console.log('TokenIds List:', tokenIDs);
+        const wrappedTokens = [tokenIDs];
 
-        const transaction = this.transactionsFactory.createTransactionForExecute({
-            sender: Address.fromBech32(address),
-            contract: Address.fromBech32(this.networkConfigService.config.liquidlockingContract),
-            function: "unbond",
-            gasLimit: BigInt(35_000_000),
-            arguments: [
-                tokenIDs,
-            ],
-        });
-        //.toPlainObject();
+        const transaction = this.createTransactionFromBackend(address, wrappedTokens, "unbond", []);
 
         return transaction;
+    }
+
+    public async sendLockTransaction(address: string, body: PaymentList) {
+        const transaction = this.generateLockTransactionFromBackend(address, body);
+
+        // Next nonce: 26824 -> de obicei din network provider get accountByAddress (are arg address)
+        const pemText = await promises.readFile("/home/justeatanapple/ctfBlac.pem", { encoding: "utf8" });
+        const networkProvider = new ApiNetworkProvider(this.commonConfigService.config.urls.api);
+        const aux = await networkProvider.getAccount(Address.fromBech32(transaction.sender));
+        transaction.nonce = BigInt(aux.nonce);
+        const signer = UserSigner.fromPem(pemText);
+        const computer = new TransactionComputer();
+        const serializedTx = computer.computeBytesForSigning(transaction);
+        transaction.signature = await signer.sign(serializedTx);
+
+        console.log(transaction);
+
+        const txHash = await networkProvider.sendTransaction(transaction);
+        console.log("TX hash:", txHash);
+    }
+
+    public async sendUnlockTransaction(address: string, body: PaymentList) {
+        const transaction = this.generateUnlockTransactionFromBackend(address, body);
+        const pemText = await promises.readFile("/home/justeatanapple/ctfBlac.pem", { encoding: "utf8" });
+        const networkProvider = new ApiNetworkProvider(this.commonConfigService.config.urls.api);
+        const aux = await networkProvider.getAccount(Address.fromBech32(transaction.sender));
+        transaction.nonce = BigInt(aux.nonce);
+        const signer = UserSigner.fromPem(pemText);
+        const computer = new TransactionComputer();
+        const serializedTx = computer.computeBytesForSigning(transaction);
+        transaction.signature = await signer.sign(serializedTx);
+
+        console.log(transaction);
+
+        const txHash = await networkProvider.sendTransaction(transaction);
+        console.log("TX hash:", txHash);
     }
 
     public async sendUnbondTransaction(address: string, body: TokenIdentifierList) {
@@ -161,5 +289,31 @@ export class LiquidLockingService {
 
         const txHash = await networkProvider.sendTransaction(transaction);
         console.log("TX hash:", txHash);
+    }
+
+    public createTransaction(address: string, args: any[] | [], functionName: string, esdtTokens: TokenTransfer[] | []): any {
+        const tx = this.transactionsFactory.createTransactionForExecute({
+            sender: Address.fromBech32(address),
+            contract: Address.fromBech32(this.networkConfigService.config.liquidlockingContract),
+            function: functionName,
+            gasLimit: BigInt(35_000_000),
+            arguments: args,
+            tokenTransfers: esdtTokens,
+        }).toPlainObject();
+
+        return tx;
+    }
+
+    public createTransactionFromBackend(address: string, args: any[] | [], functionName: string, esdtTokens: TokenTransfer[] | []): Transaction {
+        const tx = this.transactionsFactory.createTransactionForExecute({
+            sender: Address.fromBech32(address),
+            contract: Address.fromBech32(this.networkConfigService.config.liquidlockingContract),
+            function: functionName,
+            gasLimit: BigInt(35_000_000),
+            arguments: args,
+            tokenTransfers: esdtTokens,
+        });
+
+        return tx;
     }
 }

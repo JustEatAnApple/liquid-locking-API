@@ -4,6 +4,8 @@ export class CacheInfo {
   key: string = "";
   ttl: number = Constants.oneSecond() * 6;
 
+
+  // Exemplu cu variabila cum ar veni cand ai endpoint cu /$address/endpoint
   static LastProcessedNonce(shardId: number): CacheInfo {
     return {
       key: `lastProcessedNonce:${shardId}`,
@@ -11,6 +13,7 @@ export class CacheInfo {
     };
   }
 
+  // Exemplu simplu
   static Examples: CacheInfo = {
     key: "examples",
     ttl: Constants.oneHour(),
