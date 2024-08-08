@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { DatabaseModule } from '@libs/database';
+
 import { DynamicModuleUtils, NetworkConfigModule } from '@libs/common';
 import { LiquidLockingService } from './liquid-locking/liquid-locking.service';
 

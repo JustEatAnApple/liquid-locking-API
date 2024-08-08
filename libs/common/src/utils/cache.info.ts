@@ -46,4 +46,18 @@ export class CacheInfo {
       ttl: Constants.oneSecond() * 5,
     };
   }
+
+  static LockedTokens(address: string): CacheInfo{
+    return {
+      key: "LockedTokens-" + address,
+      ttl: Constants.oneSecond() * 5
+    }
+  }
+
+  static LockedTokenAmounts(address: string): CacheInfo{
+    return {
+      key: "LockedTokenAmounts-" + address,
+      ttl: Constants.oneSecond() * 5
+    }
+  }
 }

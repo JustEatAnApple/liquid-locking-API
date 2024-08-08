@@ -12,6 +12,7 @@ import { DynamicModuleUtils } from "@libs/common";
     providers: [
         DynamicModuleUtils.getNestJsApiConfigService(),
         LiquidLockingService,
+        DynamicModuleUtils.getNestJsApiConfigService()
     ],
     controllers: [
         LiquidLockingController,
