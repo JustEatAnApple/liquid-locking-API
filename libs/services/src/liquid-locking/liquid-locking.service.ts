@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { TokenIdentifier, TokenIdentifierList, UnbondPeriodOutput, UnlockedTokens, LockedTokenAmountsOutput, PaymentList, LockedTokensOutput } from "@libs/entities/entities/properties";
-import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, Transaction, TransactionComputer, SmartContractTransactionsFactory,  Token,  TokenTransfer,  TransactionsFactoryConfig } from "@multiversx/sdk-core/out";
+import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, Transaction, TransactionComputer, SmartContractTransactionsFactory, Token, TokenTransfer, TransactionsFactoryConfig } from "@multiversx/sdk-core/out";
 import abiLiquid from "./liquid-locking.abi.json";
 import { ApiNetworkProvider } from "@multiversx/sdk-network-providers";
 import { UserSigner } from "@multiversx/sdk-wallet"; // usually from frontend
@@ -70,15 +70,15 @@ export class LiquidLockingService {
         return tokenIdentifierList;
     }
 
-    public async getLockedTokens(address: string) : Promise<LockedTokensOutput[]> {
+    public async getLockedTokens(address: string): Promise<LockedTokensOutput[]> {
         return this.cachingService.getOrSet(
-            CacheInfo.LockedTokens(address).key, 
+            CacheInfo.LockedTokens(address).key,
             async () => await this.getLockedTokensRaw(address),
             CacheInfo.LockedTokens(address).ttl
         )
     }
 
-    private async getLockedTokensRaw(address: string) : Promise<LockedTokensOutput[]> {
+    private async getLockedTokensRaw(address: string): Promise<LockedTokensOutput[]> {
         const query = this.queriesController.createQuery({
             contract: this.networkConfigService.config.liquidlockingContract,
             function: "lockedTokens",
@@ -87,7 +87,7 @@ export class LiquidLockingService {
             ]
         })
 
-        const response = await this. queriesController.runQuery(query);
+        const response = await this.queriesController.runQuery(query);
         const [lockedTokens] = this.queriesController.parseQueryResponse(response);
 
         console.log(lockedTokens);
@@ -95,15 +95,15 @@ export class LiquidLockingService {
         return lockedTokens;
     }
 
-    public async getLockedTokenAmounts(address: string) : Promise<LockedTokenAmountsOutput[]> {
+    public async getLockedTokenAmounts(address: string): Promise<LockedTokenAmountsOutput[]> {
         return this.cachingService.getOrSet(
-            CacheInfo.LockedTokenAmounts(address).key, 
+            CacheInfo.LockedTokenAmounts(address).key,
             async () => await this.getLockedTokenAmountsRaw(address),
             CacheInfo.LockedTokenAmounts(address).ttl
         )
     }
-    
-    public async getLockedTokenAmountsRaw(address: string) : Promise<LockedTokenAmountsOutput[]> {
+
+    public async getLockedTokenAmountsRaw(address: string): Promise<LockedTokenAmountsOutput[]> {
         const query = this.queriesController.createQuery({
             contract: this.networkConfigService.config.liquidlockingContract,
             function: "lockedTokenAmounts",
@@ -112,7 +112,7 @@ export class LiquidLockingService {
             ]
         })
 
-        const response = await this. queriesController.runQuery(query);
+        const response = await this.queriesController.runQuery(query);
         const [lockedTokenAmounts] = this.queriesController.parseQueryResponse(response);
 
         console.log(lockedTokenAmounts);
@@ -128,7 +128,7 @@ export class LiquidLockingService {
         );
     }
 
-    async getUnlockedTokensRaw(address: string): Promise<TokenIdentifierList> {
+    public async getUnlockedTokensRaw(address: string): Promise<TokenIdentifierList> {
         const query = this.queriesController.createQuery({
             contract: this.networkConfigService.config.liquidlockingContract,
             function: "unlockedTokens",
@@ -143,7 +143,7 @@ export class LiquidLockingService {
         return tokenIdentifierList;
     }
 
-    public async getUnlockedTokenAmounts(address: string): Promise<TokenIdentifierList> {
+    public async getUnlockedTokenAmounts(address: string): Promise<UnlockedTokens> {
         return this.cachingService.getOrSet(
             CacheInfo.UnlockedTokensAmounts(address).key,
             async () => await this.getUnlockedTokenAmountsRaw(address),
@@ -151,7 +151,7 @@ export class LiquidLockingService {
         );
     }
 
-    async getUnlockedTokenAmountsRaw(address: string): Promise<UnlockedTokens> {
+    public async getUnlockedTokenAmountsRaw(address: string): Promise<UnlockedTokens> {
         const query = this.queriesController.createQuery({
             contract: this.networkConfigService.config.liquidlockingContract,
             function: "unlockedTokenAmounts",
@@ -411,5 +411,22 @@ export class LiquidLockingService {
         });
 
         return tx;
+    }
+
+    async setUnbondPeriod(address: string, body: UnbondPeriodOutput): Promise<UnbondPeriodOutput> {
+        const transaction = this.createTransaction(address, [body.unbondPeriod], "set_unbond_period", []);
+        return transaction;
+    }
+
+    async addTokenToWhitelist(address: string, body: TokenIdentifier
+    ): Promise<UnbondPeriodOutput> {
+        const transaction = this.createTransaction(address, [body.token_identifier], "set_unbond_period", []);
+        return transaction;
+    }
+
+    async addTokenToBlackList(address: string, body: TokenIdentifier
+    ): Promise<UnbondPeriodOutput> {
+        const transaction = this.createTransaction(address, [body.token_identifier], "set_unbond_period", []);
+        return transaction;
     }
 }

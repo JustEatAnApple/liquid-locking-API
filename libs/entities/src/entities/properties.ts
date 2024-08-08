@@ -66,5 +66,5 @@ export class UnlockedTokens {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => TokenIdentifier)
-    tokens!: TokenIdentifier[];
+    tokens!: UnlockedToken[];
 }
