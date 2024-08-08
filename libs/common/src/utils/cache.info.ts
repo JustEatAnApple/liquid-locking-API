@@ -22,14 +22,28 @@ export class CacheInfo {
   static WhitelistedTokens(): CacheInfo {
     return {
       key: "whitelistedTokens",
-      ttl: Constants.oneHour(),
+      ttl: Constants.oneSecond() * 5,
     };
   }
 
   static UnbondPeriod(): CacheInfo {
     return {
       key: "unbondPeriod",
-      ttl: Constants.oneHour(),
+      ttl: Constants.oneSecond() * 5,
+    };
+  }
+
+  static UnlockedTokens(address: string): CacheInfo {
+    return {
+      key: "UnlockedTokens-" + address,
+      ttl: Constants.oneSecond() * 5,
+    };
+  }
+
+  static UnlockedTokensAmounts(address: string): CacheInfo {
+    return {
+      key: "UnlockedTokensAmounts-" + address,
+      ttl: Constants.oneSecond() * 5,
     };
   }
 }
