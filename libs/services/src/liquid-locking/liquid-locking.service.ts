@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PaymentList, TokenIdentifier, TokenIdentifierList, UnbondPeriodOutput } from "@libs/entities/entities/properties";
+import { PaymentList, TokenIdentifier, TokenIdentifierList, UnbondPeriodOutput, UnlockedTokens } from "@libs/entities/entities/properties";
 import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, SmartContractTransactionsFactory, Token, TokenTransfer, Transaction, TransactionComputer, TransactionsFactoryConfig } from "@multiversx/sdk-core/out";
 import abiLiquid from "./liquid-locking.abi.json";
 import { ApiNetworkProvider } from "@multiversx/sdk-network-providers";
@@ -68,6 +68,53 @@ export class LiquidLockingService {
         tokenIdentifierList.tokens = tokenIdentifiers;
 
         return tokenIdentifierList;
+    }
+
+    public async getUnlockedTokens(address: string): Promise<TokenIdentifierList> {
+        return this.cachingService.getOrSet(
+            CacheInfo.UnlockedTokens(address).key,
+            async () => await this.getUnlockedTokensRaw(address),
+            CacheInfo.UnlockedTokens(address).ttl,
+        );
+    }
+
+    async getUnlockedTokensRaw(address: string): Promise<TokenIdentifierList> {
+        const query = this.queriesController.createQuery({
+            contract: this.networkConfigService.config.liquidlockingContract,
+            function: "unlockedTokens",
+            arguments: [new Address(address)],
+        });
+
+        const response = await this.queriesController.runQuery(query);
+        const unlockedTokens = this.queriesController.parseQueryResponse(response);
+        console.log(unlockedTokens);
+        const tokenIdentifierList = new TokenIdentifierList();
+        tokenIdentifierList.tokens = unlockedTokens;
+        return tokenIdentifierList;
+    }
+
+    public async getUnlockedTokenAmounts(address: string): Promise<TokenIdentifierList> {
+        return this.cachingService.getOrSet(
+            CacheInfo.UnlockedTokensAmounts(address).key,
+            async () => await this.getUnlockedTokenAmountsRaw(address),
+            CacheInfo.UnlockedTokensAmounts(address).ttl,
+        );
+    }
+
+    async getUnlockedTokenAmountsRaw(address: string): Promise<UnlockedTokens> {
+        const query = this.queriesController.createQuery({
+            contract: this.networkConfigService.config.liquidlockingContract,
+            function: "unlockedTokenAmounts",
+            arguments: [new Address(address)],
+        });
+
+        const response = await this.queriesController.runQuery(query);
+        const unlockedTokensAmounts = this.queriesController.parseQueryResponse(response);
+        console.log(unlockedTokensAmounts);
+        const unlockedTokens = new UnlockedTokens();
+        unlockedTokens.tokens = unlockedTokensAmounts;
+        return unlockedTokens;
+
     }
 
     // eslint-disable-next-line require-await

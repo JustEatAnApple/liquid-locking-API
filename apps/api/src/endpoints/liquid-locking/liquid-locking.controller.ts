@@ -1,6 +1,6 @@
 import { LiquidLockingService } from "@libs/services/liquid-locking/liquid-locking.service";
 import { PaymentList, TokenIdentifierList, UnbondPeriodOutput } from "@libs/entities/entities/properties";
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { NativeAuth, NativeAuthGuard } from "@multiversx/sdk-nestjs-auth";
 
 @Controller()
@@ -20,6 +20,23 @@ export class LiquidLockingController {
     @Get("/unbondPeriod")
     async getUnbondPeriod(): Promise<UnbondPeriodOutput> {
         return await this.liquidlockingService.getUnbondPeriod();
+    }
+
+    //@UseGuards(NativeAuthGuard)
+    @Get("/unlockedTokens/:address")
+    async getUnlockedTokens(
+        //@NativeAuth('address') 
+        @Param('address') address: string): Promise<TokenIdentifierList> {
+        return await this.liquidlockingService.getUnlockedTokens(address);
+    }
+
+    //@UseGuards(NativeAuthGuard)
+    @Get("/unlockedTokens/amounts/:address")
+    async getUnlockedTokenAmounts(
+        //@NativeAuth('address') 
+        @Param('address') address: string,
+    ): Promise<TokenIdentifierList> {
+        return await this.liquidlockingService.getUnlockedTokenAmounts(address);
     }
 
     @Post("/lock")

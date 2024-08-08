@@ -43,3 +43,16 @@ export class UnbondPeriodOutput {
     @IsNumber()
     unbondPeriod!: number;
 }
+
+export class UnlockedToken {
+    token!: Payment
+    unbond_epoch!: number
+}
+
+export class UnlockedTokens {
+    @ApiProperty()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => TokenIdentifier)
+    tokens!: TokenIdentifier[];
+}

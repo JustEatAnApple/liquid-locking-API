@@ -32,4 +32,18 @@ export class CacheInfo {
       ttl: Constants.oneHour(),
     };
   }
+
+  static UnlockedTokens(address: string): CacheInfo {
+    return {
+      key: "UnlockedTokens-" + address,
+      ttl: Constants.oneHour(),
+    };
+  }
+
+  static UnlockedTokensAmounts(address: string): CacheInfo {
+    return {
+      key: "UnlockedTokensAmounts-" + address,
+      ttl: Constants.oneHour(),
+    };
+  }
 }
