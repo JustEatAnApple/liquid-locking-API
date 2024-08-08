@@ -26,6 +26,7 @@ export class LiquidLockingController {
     async getUnlockedTokens(
         @NativeAuth('address')
         @Param('address') address: string): Promise<TokenIdentifierList> {
+        console.log('unlockedTokens controller');
         return await this.liquidlockingService.getUnlockedTokens(address);
     }
 

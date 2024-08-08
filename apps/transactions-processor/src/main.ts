@@ -35,6 +35,7 @@ async function bootstrap() {
       },
     },
   );
+
   pubSubApp.useLogger(pubSubApp.get(WINSTON_MODULE_NEST_PROVIDER));
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   pubSubApp.listen();
