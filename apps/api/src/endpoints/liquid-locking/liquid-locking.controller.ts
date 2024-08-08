@@ -1,6 +1,6 @@
 import { LiquidLockingService } from "@libs/services/liquid-locking/liquid-locking.service";
-import { TokenIdentifierList, UnbondPeriodOutput, PaymentList, LockedTokensOutput, LockedTokenAmountsOutput } from "@libs/entities/entities/properties";
-import { Body, Controller, Get, Param, Post, UseGuards  } from "@nestjs/common";
+import { TokenIdentifierList, UnbondPeriodOutput, PaymentList, LockedTokensOutput, LockedTokenAmountsOutput, UnlockedTokens, TokenIdentifier } from "@libs/entities/entities/properties";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { NativeAuth, NativeAuthGuard } from "@multiversx/sdk-nestjs-auth";
 
 
@@ -22,36 +22,33 @@ export class LiquidLockingController {
     }
 
     @UseGuards(NativeAuthGuard)
-    @Get("/unlockedTokens/:address")
+    @Get("/unlockedTokens")
     async getUnlockedTokens(
-        @NativeAuth('address')
-        @Param('address') address: string): Promise<TokenIdentifierList> {
+        @NativeAuth('address') address: string): Promise<TokenIdentifierList> {
         console.log('unlockedTokens controller');
         return await this.liquidlockingService.getUnlockedTokens(address);
     }
 
     @UseGuards(NativeAuthGuard)
-    @Get("/unlockedTokens/amounts/:address")
+    @Get("/unlockedTokens/amounts")
     async getUnlockedTokenAmounts(
-        @NativeAuth('address')
-        @Param('address') address: string,
-    ): Promise<TokenIdentifierList> {
+        @NativeAuth('address') address: string,
+    ): Promise<UnlockedTokens> {
+        console.log(address)
         return await this.liquidlockingService.getUnlockedTokenAmounts(address);
     }
 
     @UseGuards(NativeAuthGuard)
-    @Get("/lockedTokens/:address")
+    @Get("/lockedTokens/")
     async getLokedTokens(
-        @NativeAuth('address') 
-        @Param('address') address: string) : Promise<LockedTokensOutput[]> {
+        @NativeAuth('address') address: string): Promise<LockedTokensOutput[]> {
         return await this.liquidlockingService.getLockedTokens(address);
     }
 
     @UseGuards(NativeAuthGuard)
-    @Get("/lockedTokenAmounts/amounts/:address")
+    @Get("/lockedTokenAmounts/amounts/")
     async getLokedTokenAmounts(
-        @NativeAuth('address')
-        @Param('address') address: string) : Promise<LockedTokenAmountsOutput[]> {
+        @NativeAuth('address') address: string): Promise<LockedTokenAmountsOutput[]> {
         return await this.liquidlockingService.getLockedTokenAmounts(address);
     }
 
@@ -121,4 +118,28 @@ export class LiquidLockingController {
         return this.liquidlockingService.sendUnbondTransaction(address, body);
     }
 
+    @Post("/setUnboundPeriod")
+    @UseGuards(NativeAuthGuard)
+    async setUnbondPeriod(
+        @NativeAuth('address') address: string,
+        @Body() body: UnbondPeriodOutput
+    ): Promise<UnbondPeriodOutput> {
+        return await this.liquidlockingService.setUnbondPeriod(address, body);
+    }
+    @Post("/whiteListToken")
+    @UseGuards(NativeAuthGuard)
+    async addTokenToWhitelist(
+        @NativeAuth('address') address: string,
+        @Body() body: TokenIdentifier
+    ): Promise<UnbondPeriodOutput> {
+        return await this.liquidlockingService.addTokenToWhitelist(address, body);
+    }
+    @Post("/blackListToken")
+    @UseGuards(NativeAuthGuard)
+    async addTokenToBlackList(
+        @NativeAuth('address') address: string,
+        @Body() body: TokenIdentifier
+    ): Promise<UnbondPeriodOutput> {
+        return await this.liquidlockingService.addTokenToBlackList(address, body);
+    }
 }
