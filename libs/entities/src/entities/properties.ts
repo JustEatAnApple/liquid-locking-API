@@ -44,6 +44,16 @@ export class UnbondPeriodOutput {
     unbondPeriod!: number;
 }
 
+export class LockedTokensOutput {
+    @ApiProperty()
+    lockedTokens!: TokenIdentifierList[];
+}
+
+export class LockedTokenAmountsOutput {
+    @ApiProperty()
+    lockedTokenAmounts!: PaymentList[];
+}
+
 export class UnlockedToken {
     @ApiProperty()
     token!: Payment
