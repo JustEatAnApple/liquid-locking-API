@@ -140,6 +140,7 @@ export class LiquidLockingController {
         @NativeAuth('address') address: string,
         @Body() body: TokenIdentifier
     ): Promise<UnbondPeriodOutput> {
+        console.log(address)
         return await this.liquidlockingService.addTokenToBlackList(address, body);
     }
 }
