@@ -22,18 +22,18 @@ export class LiquidLockingController {
         return await this.liquidlockingService.getUnbondPeriod();
     }
 
-    //@UseGuards(NativeAuthGuard)
+    @UseGuards(NativeAuthGuard)
     @Get("/unlockedTokens/:address")
     async getUnlockedTokens(
-        //@NativeAuth('address') 
+        @NativeAuth('address')
         @Param('address') address: string): Promise<TokenIdentifierList> {
         return await this.liquidlockingService.getUnlockedTokens(address);
     }
 
-    //@UseGuards(NativeAuthGuard)
+    @UseGuards(NativeAuthGuard)
     @Get("/unlockedTokens/amounts/:address")
     async getUnlockedTokenAmounts(
-        //@NativeAuth('address') 
+        @NativeAuth('address')
         @Param('address') address: string,
     ): Promise<TokenIdentifierList> {
         return await this.liquidlockingService.getUnlockedTokenAmounts(address);
