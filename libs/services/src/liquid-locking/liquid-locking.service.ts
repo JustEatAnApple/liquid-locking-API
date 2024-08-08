@@ -114,7 +114,6 @@ export class LiquidLockingService {
         const unlockedTokens = new UnlockedTokens();
         unlockedTokens.tokens = unlockedTokensAmounts;
         return unlockedTokens;
-
     }
 
     // eslint-disable-next-line require-await

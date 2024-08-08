@@ -45,7 +45,9 @@ export class UnbondPeriodOutput {
 }
 
 export class UnlockedToken {
+    @ApiProperty()
     token!: Payment
+    @ApiProperty()
     unbond_epoch!: number
 }
 
