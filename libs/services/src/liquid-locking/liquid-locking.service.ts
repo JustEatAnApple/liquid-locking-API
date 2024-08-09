@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { TokenIdentifier, TokenIdentifierList, UnbondPeriodOutput, UnlockedTokens, LockedTokenAmountsOutput, PaymentList, LockedTokensOutput } from "@libs/entities/entities/properties";
-import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, Transaction, TransactionComputer, SmartContractTransactionsFactory, Token, TokenTransfer, TransactionsFactoryConfig } from "@multiversx/sdk-core/out";
+import { AbiRegistry, Address, QueryRunnerAdapter, SmartContractQueriesController, Transaction, TransactionComputer, SmartContractTransactionsFactory, Token, TokenTransfer, TransactionsFactoryConfig, IPlainTransactionObject } from "@multiversx/sdk-core/out";
 import abiLiquid from "./liquid-locking.abi.json";
 import { ApiNetworkProvider } from "@multiversx/sdk-network-providers";
 import { UserSigner } from "@multiversx/sdk-wallet"; // usually from frontend
@@ -196,7 +196,7 @@ export class LiquidLockingService {
 
     }
 
-    public generateLockTransaction(address: string, args: PaymentList): any {
+    public generateLockTransaction(address: string, args: PaymentList): IPlainTransactionObject {
         if (!args || !args.tokens || !Array.isArray(args.tokens)) {
             throw new Error("Invalid body or tokens array");
         }
@@ -226,7 +226,7 @@ export class LiquidLockingService {
         return transaction;
     }
 
-    public generateUnlockTransaction(address: string, args: PaymentList): any {
+    public generateUnlockTransaction(address: string, args: PaymentList): IPlainTransactionObject {
         if (!args || !args.tokens || !Array.isArray(args.tokens)) {
             throw new Error("Invalid body or tokens array");
         }
@@ -249,7 +249,7 @@ export class LiquidLockingService {
     }
 
 
-    public generateUnbondTransaction(address: string, args: TokenIdentifierList): any {
+    public generateUnbondTransaction(address: string, args: TokenIdentifierList): IPlainTransactionObject {
         if (!args || !args.tokens || !Array.isArray(args.tokens)) {
             throw new Error("Invalid body or tokens array");
         }
@@ -387,7 +387,7 @@ export class LiquidLockingService {
         console.log("TX hash:", txHash);
     }
 
-    public createTransaction(address: string, args: any[] | [], functionName: string, esdtTokens: TokenTransfer[] | []): any {
+    public createTransaction(address: string, args: any[] | [], functionName: string, esdtTokens: TokenTransfer[] | []): IPlainTransactionObject {
         const tx = this.transactionsFactory.createTransactionForExecute({
             sender: Address.fromBech32(address),
             contract: Address.fromBech32(this.networkConfigService.config.liquidlockingContract),
@@ -413,19 +413,19 @@ export class LiquidLockingService {
         return tx;
     }
 
-    async setUnbondPeriod(address: string, body: UnbondPeriodOutput): Promise<UnbondPeriodOutput> {
+    async setUnbondPeriod(address: string, body: UnbondPeriodOutput): Promise<IPlainTransactionObject> {
         const transaction = this.createTransaction(address, [body.unbondPeriod], "set_unbond_period", []);
         return transaction;
     }
 
     async addTokenToWhitelist(address: string, body: TokenIdentifier
-    ): Promise<UnbondPeriodOutput> {
+    ): Promise<IPlainTransactionObject> {
         const transaction = this.createTransaction(address, [body.token_identifier], "whitelist_token", []);
         return transaction;
     }
 
     async addTokenToBlackList(address: string, body: TokenIdentifier
-    ): Promise<UnbondPeriodOutput> {
+    ): Promise<IPlainTransactionObject> {
         const transaction = this.createTransaction(address, [body.token_identifier], "blacklist_token", []);
         return transaction;
     }

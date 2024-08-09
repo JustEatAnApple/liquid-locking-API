@@ -2,6 +2,7 @@ import { LiquidLockingService } from "@libs/services/liquid-locking/liquid-locki
 import { TokenIdentifierList, UnbondPeriodOutput, PaymentList, LockedTokensOutput, LockedTokenAmountsOutput, UnlockedTokens, TokenIdentifier } from "@libs/entities/entities/properties";
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { NativeAuth, NativeAuthGuard } from "@multiversx/sdk-nestjs-auth";
+import { IPlainTransactionObject } from "@multiversx/sdk-core/out";
 
 
 @Controller()
@@ -57,7 +58,7 @@ export class LiquidLockingController {
     generateLockTransaction(
         @NativeAuth('address') address: string,
         @Body() body: PaymentList,
-    ): any {
+    ): IPlainTransactionObject {
         console.log('Received address:', address);
         console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
         return this.liquidlockingService.generateLockTransaction(address, body);
@@ -79,7 +80,7 @@ export class LiquidLockingController {
     generateUnlockTransaction(
         @NativeAuth('address') address: string,
         @Body() body: PaymentList,
-    ): any {
+    ): IPlainTransactionObject {
         console.log('Received address:', address);
         console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
         return this.liquidlockingService.generateUnlockTransaction(address, body);
@@ -101,7 +102,7 @@ export class LiquidLockingController {
     generateUnbondTransaction(
         @NativeAuth('address') address: string,
         @Body() body: TokenIdentifierList,
-    ): any {
+    ): IPlainTransactionObject {
         console.log('Received address:', address);
         console.log('Received body:', JSON.stringify(body, null, 2)); // Log the body
         return this.liquidlockingService.generateUnbondTransaction(address, body);
@@ -123,7 +124,7 @@ export class LiquidLockingController {
     async setUnbondPeriod(
         @NativeAuth('address') address: string,
         @Body() body: UnbondPeriodOutput
-    ): Promise<UnbondPeriodOutput> {
+    ): Promise<IPlainTransactionObject> {
         return await this.liquidlockingService.setUnbondPeriod(address, body);
     }
     @Post("/whiteListToken")
@@ -131,7 +132,7 @@ export class LiquidLockingController {
     async addTokenToWhitelist(
         @NativeAuth('address') address: string,
         @Body() body: TokenIdentifier
-    ): Promise<UnbondPeriodOutput> {
+    ): Promise<IPlainTransactionObject> {
         return await this.liquidlockingService.addTokenToWhitelist(address, body);
     }
     @Post("/blackListToken")
@@ -139,7 +140,7 @@ export class LiquidLockingController {
     async addTokenToBlackList(
         @NativeAuth('address') address: string,
         @Body() body: TokenIdentifier
-    ): Promise<UnbondPeriodOutput> {
+    ): Promise<IPlainTransactionObject> {
         console.log(address)
         return await this.liquidlockingService.addTokenToBlackList(address, body);
     }
