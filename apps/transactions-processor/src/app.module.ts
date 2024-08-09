@@ -24,6 +24,7 @@ import { ApiModule } from '@multiversx/sdk-nestjs-http';
   ],
   providers: [
     ProcessorService,
+    DynamicModuleUtils.getPubSubService(),
   ],
   controllers: [
     ApiMetricsController,
